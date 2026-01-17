@@ -36,6 +36,9 @@ chroma_db_dir = "lexclaraDB/ChromaDB"
 model_llm_name = "mistralai/Mistral-7B-Instruct-v0.3"
 embeddings_name = "BAAI/bge-m3"
 hf_token = os.getenv("HF_TOKEN")
+# este print só é visível nos logs para garantir que o token não está vazio
+if not hf_token:
+    print("ERRO: O token HF_TOKEN não foi encontrado nas variáveis de ambiente!")
 
 # ===== carregar embeddings e base de dados vetorial
 model_kwargs = {'device': 'cpu'

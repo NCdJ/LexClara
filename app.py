@@ -33,7 +33,8 @@ transformers_logging.set_verbosity_info()
 
 # ===== Configurações
 chroma_db_dir = "lexclaraDB/ChromaDB"
-model_llm_name = "mistralai/Mistral-7B-Instruct-v0.3"
+# old_model_llm_name = "mistralai/Mistral-7B-Instruct-v0.3"
+model_llm_name = "mistralai/Mistral-Nemo-Instruct-2407"
 embeddings_name = "BAAI/bge-m3"
 hf_token = os.environ.get("HF_TOKEN") or os.getenv("HF_TOKEN")
 # este print só é visível nos logs para garantir que o token não está vazio
@@ -93,7 +94,6 @@ def criar_llm(
         ,do_sample=True
         ,streaming=True
         ,return_full_text=False
-        ,connection_params={"proxies": None}
     )
 
     llm = ChatHuggingFace(llm=generator)

@@ -13,7 +13,7 @@ jobs:
         with:
           fetch-depth: 0
           lfs: true
-      - name: Push to hub
+      - name: Push to Hugging Face Spaces
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-        run: git push https://necajesus:$HF_TOKEN@huggingface.co/spaces/necajesus/lexclara-chatbot main --force
+        run: git push https://necajesus:$HF_TOKEN@huggingface.co/spaces/necajesus/lexclara-chatbot main:main --force

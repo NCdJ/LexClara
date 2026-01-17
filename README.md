@@ -19,7 +19,7 @@ O sistema adota uma arquitetura de _Retrieval-Augmented Generation_ (RAG), combi
 
 Disponibilizado como _software_ de código aberto sob a licença MIT, o **LexClara** pode ser livremente utilizado, modificado e redistribuído, incluindo para fins académicos e de investigação. O projeto é disponibilizado sem garantias, não substitui aconselhamento jurídico e destina-se exclusivamente a fins educativos e experimentais, enquadrando-se na área de **LegalTech**, com foco na clareza, transparência e acessibilidade da informação legislativa.
 
-O assistente pode ser utilizado no Hugginface Spaces.
+O assistente pode ser utilizado no Hugginface Spaces (https://huggingface.co/spaces/necajesus/lexclara-chatbot).
 
 ## Tecnologias Utilizadas
 - **LLM:** Mistral-7B via Hugging Face Inference API (Serverless).

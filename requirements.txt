@@ -1,0 +1,12 @@
+gradio
+chromadb
+pandas
+langchain
+langchain-chroma
+langchain-huggingface
+langchain-community
+huggingface_hub
+transformers
+sentence-transformers
+torch
+pydantic==2.8.2

@@ -39,3 +39,19 @@ luac.out
 *.x86_64
 *.hex
 
+# Ignorar pastas de modelos locais
+models/
+lexclaraDB/ChromaDB/
+
+# Ignorar ambiente virtual
+.venv/
+env/
+venv/
+
+# Ignorar ficheiros de sistema e logs
+.DS_Store
+__pycache__/
+*.log
+
+# NUNCA enviar ficheiros .env (se usar um localmente)
+.env

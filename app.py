@@ -81,19 +81,15 @@ def criar_llm(
 
     """
 
-    repo_id = "mistralai/Mistral-7B-Instruct-v0.3"
-
-
-
     generator = HuggingFaceEndpoint(
-        repo_id=repo_id
+        repo_id=model_llm_name
         ,task="text-generation"
         ,temperature=max(temperature, 0.01)
         ,top_k=top_k
         ,top_p=top_p
         ,max_new_tokens=max_tokens
         ,repetition_penalty=repetition_penalty
-        ,huggingfacehub_api_token=hf_token
+        ,huggingfacehub_api_token=os.getenv("HF_TOKEN")
         ,do_sample=True
         ,streaming=True
         ,return_full_text=False

@@ -41,7 +41,6 @@ luac.out
 
 # Ignorar pastas de modelos locais
 models/
-lexclaraDB/ChromaDB/
 
 # Ignorar ambiente virtual
 .venv/

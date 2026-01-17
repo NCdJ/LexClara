@@ -1,9 +1,5 @@
 *.sqlite3 filter=lfs diff=lfs merge=lfs -text
 *.bin filter=lfs diff=lfs merge=lfs -text
 *.pickle filter=lfs diff=lfs merge=lfs -text
-<<<<<<< HEAD
-=======
-lexclaraDB/ChromaDB/***/*.bin filter=lfs diff=lfs merge=lfs -text
 lexclaraDB/ChromaDB/**/*.bin filter=lfs diff=lfs merge=lfs -text
 lexclaraDB/ChromaDB/chroma.sqlite3 filter=lfs diff=lfs merge=lfs -text
->>>>>>> 9645837 (Track de ficheiros após instalação git-lfs)

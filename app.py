@@ -93,6 +93,7 @@ def criar_llm(
         ,do_sample=True
         ,streaming=True
         ,return_full_text=False
+        ,connection_params={"proxies": None}
     )
 
     llm = ChatHuggingFace(llm=generator)

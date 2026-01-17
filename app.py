@@ -35,7 +35,7 @@ transformers_logging.set_verbosity_info()
 chroma_db_dir = "lexclaraDB/ChromaDB"
 model_llm_name = "mistralai/Mistral-7B-Instruct-v0.3"
 embeddings_name = "BAAI/bge-m3"
-hf_token = os.getenv("HF_TOKEN")
+hf_token = os.environ.get("HF_TOKEN") or os.getenv("HF_TOKEN")
 # este print só é visível nos logs para garantir que o token não está vazio
 if not hf_token:
     print("ERRO: O token HF_TOKEN não foi encontrado nas variáveis de ambiente!")
@@ -89,7 +89,7 @@ def criar_llm(
         ,top_p=top_p
         ,max_new_tokens=max_tokens
         ,repetition_penalty=repetition_penalty
-        ,huggingfacehub_api_token=os.getenv("HF_TOKEN")
+        ,huggingfacehub_api_token=hf_token
         ,do_sample=True
         ,streaming=True
         ,return_full_text=False

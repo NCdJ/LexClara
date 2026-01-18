@@ -87,13 +87,7 @@ def criar_llm(
 
     """
     # https://github.com/langchain-ai/langchain/issues/31434#issuecomment-2936308959
-
-    # model parameters
-    model_kwargs = {
-        "timeout": 6000,
-        "task":'conversational'
-    }
-
+    
     llm = HuggingFaceEndpoint(
         repo_id=model_llm_name
         ,task="text-generation"
@@ -103,7 +97,7 @@ def criar_llm(
         ,max_new_tokens=max_tokens
         ,repetition_penalty=repetition_penalty
         ,huggingfacehub_api_token=hf_token
-        ,**model_kwargs
+        ,timeout=6000
         ,do_sample=True
         ,streaming=True
         ,return_full_text=False
@@ -422,4 +416,5 @@ with gr.Blocks() as chatbot_LexClara: # type: ignore
 
 if __name__ == "__main__":
     chatbot_LexClara.launch(footer_links=['gradio']
-                            ,theme=gr.themes.Default(text_size="lg"))  # type: ignore
+                            ,theme=gr.themes.Default(text_size="lg")
+                            ,ssr_mode=False)  # type: ignore

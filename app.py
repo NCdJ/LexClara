@@ -4,24 +4,24 @@ import re
 import os
 import random
 import warnings
-import chromadb # type: ignore
-import gradio as gr # type: ignore
-import pandas as pd # type: ignore
+import chromadb
+import gradio as gr
+import pandas as pd
 from typing import List, Pattern
-from langchain_chroma import Chroma # type: ignore
-from langchain_core.runnables import RunnablePassthrough, RunnableLambda # type: ignore
-from langchain_core.output_parsers import StrOutputParser # type: ignore
-from langchain_core.prompts import ( # type: ignore
+from langchain_chroma import Chroma
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import (
     ChatPromptTemplate,
     HumanMessagePromptTemplate,
     AIMessagePromptTemplate,
     SystemMessagePromptTemplate   
 )
-from langchain_huggingface import ( # type: ignore
+from langchain_huggingface import (
     HuggingFaceEmbeddings
     ,HuggingFaceEndpoint
 )
-from transformers import logging as transformers_logging # type: ignore
+from transformers import logging as transformers_logging
 
 warnings.simplefilter(action='ignore', category=FutureWarning)
 

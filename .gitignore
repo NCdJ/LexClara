@@ -52,6 +52,7 @@ docs/
 .DS_Store
 __pycache__/
 *.log
+.github/
 
 # NUNCA enviar ficheiros .env (se usar um localmente)
 .env

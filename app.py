@@ -360,7 +360,7 @@ def responder_pelo_gradio_com_LLM(
 with gr.Blocks() as chatbot_LexClara: # type: ignore
     gr.Markdown("##Chat Jurídico com Mistral (Few-shot + Parametrização)")
 
-     with gr.Row():
+    with gr.Row():
         pergunta_input = gr.Textbox(label="Pergunta"
                                     , lines = 2
                                     , placeholder="Ex: O que é o Decreto-Lei n.º 137/2023?")      
@@ -398,7 +398,7 @@ with gr.Blocks() as chatbot_LexClara: # type: ignore
         chunks_output = gr.Textbox(label="Segmentos de Texto Recuperados", lines=8)
     resposta_esperada_output = gr.Textbox(label="Resposta Esperada (para avaliação)", lines=4)
     perguntar_btn = gr.Button("Obter Resposta")
-    
+
     # Funções aplicadas aos botões
     usar_exemplo_btn.click(
         gera_exemplo_aleatorio_para_gradio,

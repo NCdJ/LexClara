@@ -46,6 +46,7 @@ models/
 .venv/
 env/
 venv/
+docs/
 
 # Ignorar ficheiros de sistema e logs
 .DS_Store

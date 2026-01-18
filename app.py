@@ -325,13 +325,15 @@ def responder_pelo_gradio_com_LLM(
         | StrOutputParser()
     )
 
-    resposta = chain.invoke(pergunta)
+    resposta = chain.invoke({
+        "input": pergunta
+        })
 
     resposta_acumulada = ""
     for token in resposta.split(" "):
         resposta_acumulada += token + " "
         yield resposta_acumulada, chunks_para_exibir
-        
+
 # ===== Interface Gradio
 
 with gr.Blocks(title="Pergunte à Legislação com Mistral", theme=gr.themes.Default(text_size="lg")) as chatbot_LexClara: # type: ignore

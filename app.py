@@ -254,7 +254,6 @@ def construir_prompt(provider: str) -> ChatPromptTemplate:
 
 def construir_prompt_few_shot() -> ChatPromptTemplate:
 
-
     # 1. Definição das mensagens de sistema e de utilizador
     sys_message = SystemMessagePromptTemplate.from_template(
         "És um chatbot de assistência jurídica que ajuda o utilizador leigo a ter contacto com as leis portuguesas."

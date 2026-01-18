@@ -7,9 +7,7 @@ import warnings
 import chromadb # type: ignore
 import gradio as gr # type: ignore
 import pandas as pd # type: ignore
-from datetime import datetime
 from typing import List, Pattern
-from langchain_core.prompts import PromptTemplate
 from langchain_chroma import Chroma # type: ignore
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda # type: ignore
 from langchain_core.output_parsers import StrOutputParser # type: ignore
@@ -21,7 +19,6 @@ from langchain_core.prompts import ( # type: ignore
 )
 from langchain_huggingface import ( # type: ignore
     HuggingFaceEmbeddings
-    ,ChatHuggingFace
     ,HuggingFaceEndpoint
 )
 from transformers import logging as transformers_logging # type: ignore
@@ -84,7 +81,7 @@ def criar_llm(
 
     llm = HuggingFaceEndpoint(
         repo_id=model_llm_name
-        ,task="text-generation"
+        ,task="conversational"
         ,temperature=max(temperature, 0.01)
         ,top_k=top_k
         ,top_p=top_p
@@ -162,37 +159,114 @@ def gera_exemplo_aleatorio_para_gradio():
     
     return pergunta, resposta
 
+def construir_prompt_hf() -> ChatPromptTemplate:
+    """
+    Prompt compatível com Hugging Face Inference API
+    task='conversational'
+    Sem histórico few-shot
+    """
+
+    sys_message = SystemMessagePromptTemplate.from_template(
+        "És um chatbot de assistência jurídica que ajuda um utilizador leigo a compreender leis portuguesas. "
+        "Responde exclusivamente com base no contexto legislativo fornecido. "
+        "Escreve frases completas, claras e com pontuação correta. "
+        "Se o contexto não contiver informação suficiente, responde exatamente: "
+        "\"Não há informação relevante nos diplomas selecionados.\" "
+        "Não inventes nem extrapoles informação."
+    )
+
+    user_message = HumanMessagePromptTemplate.from_template(
+        "Contexto legislativo relevante:\n"
+        "{context}\n\n"
+        "Pergunta:\n"
+        "{input}"
+    )
+
+    return ChatPromptTemplate.from_messages([
+        sys_message,
+        user_message
+    ])
+
+def construir_prompt_ollama() -> ChatPromptTemplate:
+    """
+    Prompt rico para modelos locais (Ollama)
+    Suporta histórico e few-shot
+    """
+
+    sys_message = SystemMessagePromptTemplate.from_template(
+        "És um chatbot de assistência jurídica que ajuda o utilizador leigo "
+        "a compreender leis portuguesas. "
+        "Responde com base no contexto legislativo fornecido. "
+        "Escreve frases completas e claras. "
+        "Se não houver informação suficiente, responde exatamente: "
+        "\"Não há informação relevante nos diplomas selecionados.\" "
+        "Não inventes respostas."
+    )
+
+    exemplos = gera_exemplo_aleatorio_do_df(df=df_linguagem_clara_2)
+
+    mensagens_exemplo = []
+    for entrada, resposta in exemplos:
+        mensagens_exemplo.append(
+            HumanMessagePromptTemplate.from_template(entrada)
+        )
+        mensagens_exemplo.append(
+            AIMessagePromptTemplate.from_template(resposta)
+        )
+
+    user_message = HumanMessagePromptTemplate.from_template(
+        "Contexto legislativo relevante:\n"
+        "{context}\n\n"
+        "Pergunta:\n"
+        "{input}"
+    )
+
+    return ChatPromptTemplate.from_messages(
+        [sys_message] + mensagens_exemplo + [user_message]
+    )
+
+def construir_prompt(provider: str) -> ChatPromptTemplate:
+    """
+    Seleciona automaticamente o prompt
+    com base no provider do LLM
+    """
+
+    provider = provider.lower()
+
+    if provider == "hf":
+        return construir_prompt_hf()
+
+    elif provider == "ollama":
+        return construir_prompt_ollama()
+
+    else:
+        raise ValueError(f"Provider não suportado: {provider}")
+
 def construir_prompt_few_shot() -> ChatPromptTemplate:
 
 
     # 1. Definição das mensagens de sistema e de utilizador
     sys_message = SystemMessagePromptTemplate.from_template(
-        "És um chatbot de assistência jurídica que ajuda o utilizador leigo a ter contacto com as leis portuguesas.\
-        Responde à pergunta com base no contexto legislativo existente na base de dados. \
-        Escreve frases completas com escrita e pontuação corretas. \
-        Se o contexto não contiver informação suficiente, responde exatamente:  \
-        Não há informação relevante nos diplomas selecionados. \
-        Não inventes respostas que não estejam no contexto. \
-        Os exemplos de diálogo apresentados servem apenas para demonstrar o formato e o estilo da resposta esperada, não devem ser repetidos. \
-        ")
+        "És um chatbot de assistência jurídica que ajuda o utilizador leigo a ter contacto com as leis portuguesas."
+        "Responde exclusivamente com base no contexto legislativo fornecido."
+        "Escreve frases completas com escrita e pontuação corretas." 
+        "Se o contexto não contiver informação suficiente, responde exatamente: "
+        "\"Não há informação relevante nos diplomas selecionados.\" "
+        "Não inventes respostas que não estejam no contexto."
+        )
 
 
-    exemplos = gera_exemplo_aleatorio_do_df(df=df_linguagem_clara_2)
-
-    mensagens_exemplo = []
-
-    for entrada, resposta in exemplos:
-        mensagens_exemplo.append(HumanMessagePromptTemplate.from_template(entrada))
-        mensagens_exemplo.append(AIMessagePromptTemplate.from_template(resposta))
-
-    input_prompt = HumanMessagePromptTemplate.from_template(
-        "Contexto legislativo relevante:\n{context}\n\n \
-        Pergunta:\n{input}\n\n \
-        Resposta")
-
-    return ChatPromptTemplate.from_messages(
-        [sys_message] + mensagens_exemplo + [input_prompt]
+    user_message = HumanMessagePromptTemplate.from_template(
+        "Contexto legislativo relevante:\n"
+        "{context}\n\n"
+        "Pergunta:\n"
+        "{input}"
     )
+
+    return ChatPromptTemplate.from_messages([
+        sys_message,
+        user_message
+    ])
 
 def responder_pelo_gradio_com_LLM(
     pergunta: str,
@@ -239,15 +313,13 @@ def responder_pelo_gradio_com_LLM(
                     , repetition_penalty)
     
     # construção do prompt de auxílio ao LLM para as respostas
-    prompt = construir_prompt_few_shot()
+    provider = "hf"  # ou "ollama"
+    prompt = construir_prompt(provider)
 
 
    # Chain LCEL (mais limpa para streaming)
     chain = (
-        {
-            "context": RunnableLambda(lambda x: contexto_texto),
-            "input": RunnablePassthrough()
-        }
+        RunnablePassthrough.assign(context=lambda _: contexto_texto)
         | prompt
         | llm
         | StrOutputParser()
@@ -256,9 +328,10 @@ def responder_pelo_gradio_com_LLM(
     resposta = chain.invoke(pergunta)
 
     resposta_acumulada = ""
-    for token in resposta.split():
+    for token in resposta.split(" "):
         resposta_acumulada += token + " "
         yield resposta_acumulada, chunks_para_exibir
+        
 # ===== Interface Gradio
 
 with gr.Blocks(title="Pergunte à Legislação com Mistral", theme=gr.themes.Default(text_size="lg")) as chatbot_LexClara: # type: ignore

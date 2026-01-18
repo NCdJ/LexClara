@@ -94,7 +94,7 @@ def criar_llm(
         ,do_sample=True
         ,streaming=False
         ,return_full_text=False
-    )
+    ) # type: ignore
     
     return llm
 
@@ -412,4 +412,5 @@ with gr.Blocks() as chatbot_LexClara: # type: ignore
 
 
 if __name__ == "__main__":
-    chatbot_LexClara.launch(title="Pergunte à Legislação com Mistral", theme=gr.themes.Default(text_size="lg"))
+    chatbot_LexClara.launch(footer_links=['gradio']
+                            ,theme=gr.themes.Default(text_size="lg"))

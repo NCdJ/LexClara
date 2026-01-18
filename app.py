@@ -38,6 +38,9 @@ hf_token = os.environ.get("HF_TOKEN") or os.getenv("HF_TOKEN")
 if not hf_token:
     print("ERRO: O token HF_TOKEN não foi encontrado nas variáveis de ambiente!")
 
+print(">>> BOOT LIMPO – VERSÃO 2026-01-18 <<<") # verifica se recompilou o código
+
+
 # ===== carregar embeddings e base de dados vetorial
 model_kwargs = {'device': 'cpu'
                 , 'trust_remote_code': True
@@ -336,7 +339,7 @@ def responder_pelo_gradio_com_LLM(
 
 # ===== Interface Gradio
 
-with gr.Blocks(title="Pergunte à Legislação com Mistral", theme=gr.themes.Default(text_size="lg")) as chatbot_LexClara: # type: ignore
+with gr.Blocks() as chatbot_LexClara: # type: ignore
 
 
     gr.Markdown("##Chat Jurídico com Mistral (Few-shot + Parametrização)")
@@ -409,4 +412,4 @@ with gr.Blocks(title="Pergunte à Legislação com Mistral", theme=gr.themes.Def
 
 
 if __name__ == "__main__":
-    chatbot_LexClara.launch()
+    chatbot_LexClara.launch(title="Pergunte à Legislação com Mistral", theme=gr.themes.Default(text_size="lg"))

@@ -90,7 +90,7 @@ def criar_llm(
     
     llm = HuggingFaceEndpoint(
         repo_id=model_llm_name
-        ,task="text-generation"
+        ,task="conversational"
         ,temperature=max(temperature, 0.01)
         ,top_k=top_k
         ,top_p=top_p
@@ -416,5 +416,5 @@ with gr.Blocks() as chatbot_LexClara: # type: ignore
 
 if __name__ == "__main__":
     chatbot_LexClara.launch(footer_links=['gradio']
-                            ,theme=gr.themes.Default(text_size="lg")
-                            ,ssr_mode=False)  # type: ignore
+                            ,theme=gr.themes.Default(text_size="lg") # type: ignore
+                            ,ssr_mode=False)

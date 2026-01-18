@@ -5,11 +5,16 @@ import os
 import random
 import warnings
 import chromadb
+import datetime
 import gradio as gr
 import pandas as pd
+from operator import itemgetter
 from typing import List, Pattern
 from langchain_chroma import Chroma
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import (
+    RunnablePassthrough
+    , RunnableLambda
+)
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import (
     ChatPromptTemplate,
@@ -38,7 +43,7 @@ hf_token = os.environ.get("HF_TOKEN") or os.getenv("HF_TOKEN")
 if not hf_token:
     print("ERRO: O token HF_TOKEN não foi encontrado nas variáveis de ambiente!")
 
-print(">>> BOOT LIMPO – VERSÃO 2026-01-18 <<<") # verifica se recompilou o código
+print(f">>> BOOT LIMPO – VERSÃO {datetime.datetime.now()} <<<") # verifica se recompilou o código
 
 
 # ===== carregar embeddings e base de dados vetorial
@@ -81,18 +86,26 @@ def criar_llm(
     Cria e retorna um LLM da Mistral com os parâmetros ajustáveis.
 
     """
+    # https://github.com/langchain-ai/langchain/issues/31434#issuecomment-2936308959
+
+    # model parameters
+    model_kwargs = {
+        "timeout": 6000,
+        "task":'conversational'
+    }
 
     llm = HuggingFaceEndpoint(
         repo_id=model_llm_name
-        ,task="conversational"
+        ,task="text-generation"
         ,temperature=max(temperature, 0.01)
         ,top_k=top_k
         ,top_p=top_p
         ,max_new_tokens=max_tokens
         ,repetition_penalty=repetition_penalty
         ,huggingfacehub_api_token=hf_token
+        ,**model_kwargs
         ,do_sample=True
-        ,streaming=False
+        ,streaming=True
         ,return_full_text=False
     ) # type: ignore
     
@@ -271,6 +284,7 @@ def construir_prompt_few_shot() -> ChatPromptTemplate:
         user_message
     ])
 
+# ==== Função principal
 def responder_pelo_gradio_com_LLM(
     pergunta: str,
     temperature: float,
@@ -309,7 +323,7 @@ def responder_pelo_gradio_com_LLM(
         chunks_para_exibir = "\n\n---\n\n".join([f"DOC {i+1}:\n{doc.page_content}" for i, doc in enumerate(docs)])
 
     # Prepara o LLM com os parâmetros recebidos, e presentes no interface
-    llm = criar_llm(temperature
+    chat_llm = criar_llm(temperature
                     , top_k
                     , top_p
                     , max_tokens
@@ -322,74 +336,69 @@ def responder_pelo_gradio_com_LLM(
 
    # Chain LCEL (mais limpa para streaming)
     chain = (
-        RunnablePassthrough.assign(context=lambda _: contexto_texto)
-        | prompt
-        | llm
+        {
+            "context": RunnableLambda(lambda x: contexto_texto),
+            "input": itemgetter("question") 
+            # o prompt espera "question" e "input"
+        }
+        | prompt      # Gera objetos de mensagem (System, Human, AI)
+        | chat_llm    # ChatHuggingFace converte para [INST] internamente
         | StrOutputParser()
     )
 
-    resposta = chain.invoke({
-        "input": pergunta
-        })
-
+    # Streaming
     resposta_acumulada = ""
-    for token in resposta.split(" "):
-        resposta_acumulada += token + " "
-        yield resposta_acumulada, chunks_para_exibir
+    try:
+        for chunk in chain.stream({"question": pergunta}):
+            resposta_acumulada += chunk
+            yield resposta_acumulada, chunks_para_exibir
+            
+    except Exception as e:
+        yield f"Erro na geração: {str(e)}", chunks_para_exibir
 
 # ===== Interface Gradio
-
 with gr.Blocks() as chatbot_LexClara: # type: ignore
-
-
     gr.Markdown("##Chat Jurídico com Mistral (Few-shot + Parametrização)")
-    
-    with gr.Row():
+
+     with gr.Row():
         pergunta_input = gr.Textbox(label="Pergunta"
                                     , lines = 2
-                                    , placeholder="Ex: O que é o Decreto-Lei n.º 137/2023?")
-        
-        usar_exemplo_btn = gr.Button("Usar Exemplo Aleatório")
-    
+                                    , placeholder="Ex: O que é o Decreto-Lei n.º 137/2023?")      
+        usar_exemplo_btn = gr.Button("Usar Exemplo Aleatório") 
+
     with gr.Accordion("Parâmetros Avançados", open=False):
         temperature = gr.Slider(minimum=0
                                 , maximum=1
                                 , value=0.7
                                 , step=0.1
-                                , label="Temperatura")
-        
+                                , label="Temperatura")       
         top_p = gr.Slider(minimum=0
                           , maximum=1
                           , value=1.0
                           , step=0.05
                           , label="Top-p")
-        
         top_k = gr.Slider(minimum=1
                           , maximum=50
                           , value=5
                           , step=1
                           , label="Top-k")
-        
         max_tokens = gr.Slider(minimum=100
                                , maximum=2000
                                , value=512
                                , step=100
                                , label="Número máximo de tokens gerados")
-        
         repetition_penalty = gr.Slider(minimum=1.0
                                        , maximum=2.0
                                        , value=1.2
                                        , step=0.1
                                        , label="Penalização por repetição")
-    
+        
     with gr.Row():
         resposta_output = gr.Textbox(label="Resposta do LLM", lines=4)
         chunks_output = gr.Textbox(label="Segmentos de Texto Recuperados", lines=8)
-
     resposta_esperada_output = gr.Textbox(label="Resposta Esperada (para avaliação)", lines=4)
-
     perguntar_btn = gr.Button("Obter Resposta")
-
+    
     # Funções aplicadas aos botões
     usar_exemplo_btn.click(
         gera_exemplo_aleatorio_para_gradio,
@@ -413,4 +422,4 @@ with gr.Blocks() as chatbot_LexClara: # type: ignore
 
 if __name__ == "__main__":
     chatbot_LexClara.launch(footer_links=['gradio']
-                            ,theme=gr.themes.Default(text_size="lg"))
+                            ,theme=gr.themes.Default(text_size="lg"))  # type: ignore

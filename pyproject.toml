@@ -1,7 +1,7 @@
 [project]
 name = "lexclara"
 version = "0.1.0"
-description = "Add your description here"
+description = "LexClara é um sistema de apoio jurídico baseado em GenAI que utiliza Retrieval-Augmented Generation (RAG) para simplificar diplomas legislativos portugueses, fornecendo respostas claras e contextualizadas ao cidadão leigo."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []

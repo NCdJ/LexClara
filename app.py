@@ -9,6 +9,7 @@ import gradio as gr # type: ignore
 import pandas as pd # type: ignore
 from datetime import datetime
 from typing import List, Pattern
+from langchain_core.prompts import PromptTemplate
 from langchain_chroma import Chroma # type: ignore
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda # type: ignore
 from langchain_core.output_parsers import StrOutputParser # type: ignore
@@ -19,9 +20,9 @@ from langchain_core.prompts import ( # type: ignore
     SystemMessagePromptTemplate   
 )
 from langchain_huggingface import ( # type: ignore
-    ChatHuggingFace
-    , HuggingFaceEmbeddings
-    , HuggingFaceEndpoint
+    HuggingFaceEmbeddings
+    ,ChatHuggingFace
+    ,HuggingFaceEndpoint
 )
 from transformers import logging as transformers_logging # type: ignore
 
@@ -91,11 +92,9 @@ def criar_llm(
         ,repetition_penalty=repetition_penalty
         ,huggingfacehub_api_token=hf_token
         ,do_sample=True
-        ,streaming=True
+        ,streaming=False
         ,return_full_text=False
     )
-
-    #llm = ChatHuggingFace(llm=generator)
     
     return llm
 
@@ -254,16 +253,11 @@ def responder_pelo_gradio_com_LLM(
         | StrOutputParser()
     )
 
-    # Streaming da Resposta
-    resposta_acumulada = ""
+    resposta = chain.invoke(pergunta)
 
-    for chunk in chain.stream(pergunta):
-        # Limpeza de prefixos indesejados que alguns modelos inserem
-        chunk_limpo = chunk.replace("AI:", "").replace("Resposta:", "")
-        resposta_acumulada += chunk_limpo
-        
-        # O yield permite que o Gradio atualize a interface em tempo real
-        # Retornamos dois valores: um para a Resposta e outro para os Segmentos
+    resposta_acumulada = ""
+    for token in resposta.split():
+        resposta_acumulada += token + " "
         yield resposta_acumulada, chunks_para_exibir
 # ===== Interface Gradio
 

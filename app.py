@@ -25,6 +25,7 @@ from langchain_core.prompts import (
 from langchain_huggingface import (
     HuggingFaceEmbeddings
     ,HuggingFaceEndpoint
+    ,ChatHuggingFace
 )
 from transformers import logging as transformers_logging
 
@@ -88,9 +89,9 @@ def criar_llm(
     """
     # https://github.com/langchain-ai/langchain/issues/31434#issuecomment-2936308959
     
-    llm = HuggingFaceEndpoint(
+    llm_endpoint = HuggingFaceEndpoint(
         repo_id=model_llm_name
-        ,task="text-generation"
+        ,task="conversational"
         ,temperature=max(temperature, 0.01)
         ,top_k=top_k
         ,top_p=top_p
@@ -100,10 +101,12 @@ def criar_llm(
         ,timeout=6000
         ,do_sample=True
         ,streaming=True
-        ,return_full_text=False
+        # ,return_full_text=False
     ) # type: ignore
     
-    return llm
+    chat = ChatHuggingFace(llm=llm_endpoint)
+
+    return chat
 
 # ===== Funções auxiliares
 

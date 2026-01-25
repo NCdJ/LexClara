@@ -354,7 +354,7 @@ def responder_pelo_gradio_com_LLM(
 
 # ===== Interface Gradio
 with gr.Blocks() as chatbot_LexClara: # type: ignore
-    gr.Markdown("##Chat Jurídico com Mistral (Few-shot + Parametrização)")
+    gr.Markdown("##Chat Jurídico com Llama-3.1-8B-Instruct (Few-shot + Parametrização)")
 
     with gr.Row():
         pergunta_input = gr.Textbox(label="Pergunta"

@@ -142,10 +142,10 @@ def gera_exemplo_aleatorio_do_df(df):
     linha = df.sample(n=1).iloc[0]
 
     perguntas=[
-            f"O que é o diploma {linha['identificacao_diploma']}?",
-            f"O que vai mudar com o diploma {linha['identificacao_diploma']}?",
-            f"Que vantagens traz o diploma {linha['identificacao_diploma']}?",
-            f"Quando entra em vigor o diploma {linha['identificacao_diploma']}?"
+            f"O que é o {linha['identificacao_diploma']}?",
+            f"O que vai mudar com o {linha['identificacao_diploma']}?",
+            f"Que vantagens traz o {linha['identificacao_diploma']}?",
+            f"Quando entra em vigor o {linha['identificacao_diploma']}?"
         ]
 
     for i, perg in enumerate(perguntas):
@@ -365,17 +365,17 @@ with gr.Blocks() as chatbot_LexClara: # type: ignore
     with gr.Accordion("Parâmetros Avançados", open=False):
         temperature = gr.Slider(minimum=0
                                 , maximum=1
-                                , value=0.7
+                                , value=0.2
                                 , step=0.1
                                 , label="Temperatura")       
         top_p = gr.Slider(minimum=0
                           , maximum=1
-                          , value=1.0
+                          , value=0.95
                           , step=0.05
                           , label="Top-p")
         top_k = gr.Slider(minimum=1
                           , maximum=50
-                          , value=5
+                          , value=10
                           , step=1
                           , label="Top-k")
         max_tokens = gr.Slider(minimum=100
